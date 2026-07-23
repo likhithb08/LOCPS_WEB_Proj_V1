@@ -89,9 +89,9 @@ public static class DbInitializer
         {
             var adminId = await context.Users.Where(u => u.RoleId == RoleConstants.AdminRoleId).Select(u => u.UserId).FirstAsync();
             context.LoanProducts.AddRange(
-                new LoanProduct { ProductName = "Home Purchase Loan", ProductDescription = "Residential property financing", MinAmount = 500000, MaxAmount = 50000000, InterestRate = 8.5m, MaxTenureMonths = 240, ProcessingFee = 10000, CreatedByUserId = adminId },
-                new LoanProduct { ProductName = "Personal Express Loan", ProductDescription = "Quick personal loans", MinAmount = 50000, MaxAmount = 2000000, InterestRate = 12.5m, MaxTenureMonths = 60, ProcessingFee = 2500, CreatedByUserId = adminId },
-                new LoanProduct { ProductName = "Commercial Equipment Loan", ProductDescription = "Business equipment financing", MinAmount = 200000, MaxAmount = 10000000, InterestRate = 10.0m, MaxTenureMonths = 84, ProcessingFee = 5000, CreatedByUserId = adminId }
+                new LoanProduct { ProductName = "Home Loan", ProductDescription = "Residential property financing", MinAmount = 500000, MaxAmount = 50000000, InterestRate = 8.5m, MaxTenureMonths = 240, ProcessingFee = 10000, CreatedByUserId = adminId },
+                new LoanProduct { ProductName = "Personal Loan", ProductDescription = "Quick personal loans", MinAmount = 200000, MaxAmount = 10000000, InterestRate = 10.0m, MaxTenureMonths = 84, ProcessingFee = 5000, CreatedByUserId = adminId },
+                new LoanProduct { ProductName = "Car Loan", ProductDescription = "Vehicle financing with flexible repayment options", MinAmount = 50000, MaxAmount = 2000000, InterestRate = 12.5m, MaxTenureMonths = 60, ProcessingFee = 2500, CreatedByUserId = adminId }
             );
             await context.SaveChangesAsync();
             logger.LogInformation("Seeded loan products.");
