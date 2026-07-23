@@ -5,6 +5,11 @@
     initials = initials.Length > 2 ? initials[..2] : initials;
     var roleLabel = Model?.Role?.Roles.ToString() ?? "User";
     var memberSince = Model?.CreatedDate.ToString("MMM yyyy") ?? "—";
+
+    // Determine if current user is an Admin
+    var isAdmin = Model?.RoleId == 2 ||
+                  string.Equals(roleLabel, "Admin", StringComparison.OrdinalIgnoreCase) ||
+                  string.Equals(roleLabel, "SystemAdmin", StringComparison.OrdinalIgnoreCase);
 }
 
 <div class="row mb-4">
@@ -44,7 +49,9 @@
         <div class="card border-0 shadow-sm text-center py-4">
             <div class="card-body">
                 <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
-                     style="width: 80px; height: 80px; font-weight: 700; font-size: 2rem;">@initials</div>
+                     style="width: 80px; height: 80px; font-weight: 700; font-size: 2rem;">
+                    @initials
+                </div>
                 <h5 class="fw-bold text-dark mb-1">@Model?.FullName</h5>
                 <p class="badge bg-light text-secondary border px-3 py-2 fw-semibold mb-3">@roleLabel</p>
                 <div class="border-top pt-3 text-start small mt-3">
@@ -68,6 +75,7 @@
     </div>
 
     <div class="col-lg-8">
+        <!-- Personal Profile Card -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white border-0 py-3 border-bottom">
                 <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-user text-primary me-2"></i> Personal Profile Information</h6>
@@ -102,6 +110,7 @@
             </div>
         </div>
 
+        <!-- Security & Password Management Card -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white border-0 py-3 border-bottom">
                 <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-lock text-primary me-2"></i> Security &amp; Password Management</h6>
@@ -145,44 +154,79 @@
                 </div>
 
                 <script>
-                    function checkPwdMatch() {
-                        var np = document.getElementById('newPwd').value;
-                        var cp = document.getElementById('confirmPwd').value;
-                        var msg = document.getElementById('pwdMatchMsg');
-                        if (!cp) { msg.style.display = 'none'; return; }
-                        msg.style.display = '';
-                        msg.textContent = np === cp ? '✓ Passwords match' : '✗ Passwords do not match';
-                        msg.className = 'form-text ' + (np === cp ? 'text-success' : 'text-danger');
-                    }
-                    @if (TempData["PwdError"] != null || TempData["PwdSuccess"] != null)
-                    {
-                        <text>document.addEventListener('DOMContentLoaded', function() {
-                            var el = document.getElementById('pwdForm');
-                            if (el) new bootstrap.Collapse(el, {toggle:true});
-                        });</text>
-                    }
-                </script>
+                                    function checkPwdMatch() {
+                                        var np = document.getElementById('newPwd').value;
+                                        var cp = document.getElementById('confirmPwd').value;
+                                        var msg = document.getElementById('pwdMatchMsg');
+                                        if (!cp) { msg.style.display = 'none'; return; }
+                                        msg.style.display = '';
+                                        msg.textContent = np === cp ? '✓ Passwords match' : '✗ Passwords do not match';
+                                        msg.className = 'form-text ' + (np === cp ? 'text-success' : 'text-danger');
+                                    }
+                                    @if (TempData["PwdError"] != null || TempData["PwdSuccess"] != null)
+                                    {
+                                            <text>document.addEventListener('DOMContentLoaded', function() {
+                                                    var el = document.getElementById('pwdForm');
+                                                    if (el) new bootstrap.Collapse(el, {toggle:true});
+                                                });</text>
+                                        }
+                    </script>
+                </div>
             </div>
-        </div>
 
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-0 py-3 border-bottom">
-                <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-bell text-primary me-2"></i> Notification Configurations</h6>
+            <!-- Notification Configurations Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 py-3 border-bottom">
+                    <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-bell text-primary me-2"></i> Notification Configurations</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div><h6 class="fw-semibold text-dark mb-0 small">Email Notifications</h6><span class="text-muted small">Receive automatic emails for transaction receipts and application status checks.</span></div>
+                        <div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" checked disabled /></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div><h6 class="fw-semibold text-dark mb-0 small">In-App Alerts</h6><span class="text-muted small">Display updates when scoring rules are complete or applications forward.</span></div>
+                        <div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" checked disabled /></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div><h6 class="fw-semibold text-dark mb-0 small">SMS Reminders</h6><span class="text-muted small">Send text notification warnings for critical underwriter actions.</span></div>
+                        <div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" disabled /></div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div><h6 class="fw-semibold text-dark mb-0 small">Email Notifications</h6><span class="text-muted small">Receive automatic emails for transaction receipts and application status checks.</span></div>
-                    <div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" checked disabled /></div>
+
+            <!-- Account Deactivation Toggle Card (Shown ONLY for Non-Admin Users) -->
+            @if (!isAdmin)
+            {
+                <div class="card border-0 shadow-sm border-danger">
+                    <div class="card-header bg-white border-0 py-3 border-bottom">
+                        <h6 class="fw-bold text-danger m-0">
+                            <i class="fa-solid fa-user-slash me-2"></i> Account Deactivation
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="fw-semibold text-dark mb-1 small">Deactivate Profile</h6>
+                                <p class="text-muted small mb-0">
+                                    Temporarily soft-delete your account profile. Your loan application history remains safely stored.
+                                </p>
+                            </div>
+                            <div>
+                                <!-- Corrected form target: posts to CustomerController -> DeactivateAccount -->
+                                <form asp-action="DeactivateAccount" asp-controller="Customer" method="post" class="m-0">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit"
+                                            class="btn btn-sm @(Model?.IsActive == true ? "btn-outline-danger" : "btn-outline-success") px-3"
+                                            onclick="return confirm('Are you sure you want to @(Model?.IsActive == true ? "deactivate" : "reactivate") your account?');">
+                                        <i class="fa-solid @(Model?.IsActive == true ? "fa-toggle-on" : "fa-toggle-off") me-1"></i>
+                                        @(Model?.IsActive == true ? "Deactivate Account" : "Reactivate Account")
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div><h6 class="fw-semibold text-dark mb-0 small">In-App Alerts</h6><span class="text-muted small">Display updates when scoring rules are complete or applications forward.</span></div>
-                    <div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" checked disabled /></div>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <div><h6 class="fw-semibold text-dark mb-0 small">SMS Reminders</h6><span class="text-muted small">Send text notification warnings for critical underwriter actions.</span></div>
-                    <div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" disabled /></div>
-                </div>
-            </div>
+            }
         </div>
     </div>
-</div>
