@@ -4,6 +4,7 @@ using LOCPS.Services.Interfaces;
 using LOCPS.Models;
 using LOCPS.Enums;
 using LOCPS.Common;
+using LOCPS.ViewModels.Users;
 
 namespace LOCPS.Controllers
 {
@@ -12,12 +13,18 @@ namespace LOCPS.Controllers
         private readonly ILoanApplicationService _loanApplicationService;
         private readonly ILoanProductService _loanProductService;
         private readonly IKycService _kycService;
+        private readonly IUserService _userService;
 
-        public CustomerController(ILoanApplicationService loanApplicationService, ILoanProductService loanProductService, IKycService kycService)
+        public CustomerController(
+            ILoanApplicationService loanApplicationService,
+            ILoanProductService loanProductService,
+            IKycService kycService,
+            IUserService userService)
         {
             _loanApplicationService = loanApplicationService;
             _loanProductService = loanProductService;
             _kycService = kycService;
+            _userService = userService;
         }
 
         public async Task<IActionResult> Index()
@@ -48,14 +55,14 @@ namespace LOCPS.Controllers
             // Pass product details as JSON for the client-side EMI calculator
             var productDetails = productList.Select(p => new
             {
-                productId      = p.ProductId,
-                productName    = p.ProductName,
-                minAmount      = p.MinAmount,
-                maxAmount      = p.MaxAmount,
-                interestRate   = p.InterestRate,
+                productId = p.ProductId,
+                productName = p.ProductName,
+                minAmount = p.MinAmount,
+                maxAmount = p.MaxAmount,
+                interestRate = p.InterestRate,
                 maxTenureMonths = p.MaxTenureMonths,
-                processingFee  = p.ProcessingFee,
-                description    = p.ProductDescription
+                processingFee = p.ProcessingFee,
+                description = p.ProductDescription
             });
             ViewBag.ProductDetailsJson = System.Text.Json.JsonSerializer.Serialize(productDetails);
 
@@ -78,14 +85,14 @@ namespace LOCPS.Controllers
                 ViewBag.Products = new SelectList(productList, "ProductId", "ProductName");
                 var productDetails = productList.Select(p => new
                 {
-                    productId      = p.ProductId,
-                    productName    = p.ProductName,
-                    minAmount      = p.MinAmount,
-                    maxAmount      = p.MaxAmount,
-                    interestRate   = p.InterestRate,
+                    productId = p.ProductId,
+                    productName = p.ProductName,
+                    minAmount = p.MinAmount,
+                    maxAmount = p.MaxAmount,
+                    interestRate = p.InterestRate,
                     maxTenureMonths = p.MaxTenureMonths,
-                    processingFee  = p.ProcessingFee,
-                    description    = p.ProductDescription
+                    processingFee = p.ProcessingFee,
+                    description = p.ProductDescription
                 });
                 ViewBag.ProductDetailsJson = System.Text.Json.JsonSerializer.Serialize(productDetails);
                 return View(application);
@@ -108,14 +115,14 @@ namespace LOCPS.Controllers
                 ViewBag.Products = new SelectList(productList, "ProductId", "ProductName");
                 var productDetails = productList.Select(p => new
                 {
-                    productId      = p.ProductId,
-                    productName    = p.ProductName,
-                    minAmount      = p.MinAmount,
-                    maxAmount      = p.MaxAmount,
-                    interestRate   = p.InterestRate,
+                    productId = p.ProductId,
+                    productName = p.ProductName,
+                    minAmount = p.MinAmount,
+                    maxAmount = p.MaxAmount,
+                    interestRate = p.InterestRate,
                     maxTenureMonths = p.MaxTenureMonths,
-                    processingFee  = p.ProcessingFee,
-                    description    = p.ProductDescription
+                    processingFee = p.ProcessingFee,
+                    description = p.ProductDescription
                 });
                 ViewBag.ProductDetailsJson = System.Text.Json.JsonSerializer.Serialize(productDetails);
                 return View(application);
@@ -176,10 +183,10 @@ namespace LOCPS.Controllers
                 // Save file logic (mocked saving to wwwroot/uploads for now)
                 var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
                 if (!Directory.Exists(uploadsDir)) Directory.CreateDirectory(uploadsDir);
-                
+
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
                 var filePath = Path.Combine(uploadsDir, fileName);
-                
+
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
@@ -195,12 +202,9 @@ namespace LOCPS.Controllers
                     UploadedByUserId = customerId
                 };
 
-                // Assuming IDocumentService is injected, wait we didn't inject it in CustomerController.
-                // Let's resolve it from HttpContext.RequestServices to avoid constructor changes if possible,
-                // or just modify constructor. I will resolve it.
                 var documentService = HttpContext.RequestServices.GetRequiredService<IDocumentService>();
                 await documentService.UploadAsync(doc);
-                
+
                 TempData["Success"] = "Document uploaded successfully.";
             }
             catch (Exception ex)
@@ -208,6 +212,57 @@ namespace LOCPS.Controllers
                 TempData["Error"] = ex.Message;
             }
             return RedirectToAction(nameof(Details), new { id = applicationId });
+        }
+
+        // ACTION FOR CUSTOMER SELF-DEACTIVATION (SOFT DELETE)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeactivateAccount()
+        {
+            try
+            {
+                var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(userIdStr, out var userId) || userId == 0)
+                {
+                    return RedirectToAction("Login", "Account");
+                }
+
+                var user = await _userService.GetUserByIdAsync(userId);
+                if (user == null) return NotFound();
+
+                // Safeguard: Block Admin deactivation
+                bool isAdmin = user.RoleId == 2 ||
+                               string.Equals(user.Role?.Roles.ToString(), "Admin", StringComparison.OrdinalIgnoreCase) ||
+                               string.Equals(user.Role?.Roles.ToString(), "SystemAdmin", StringComparison.OrdinalIgnoreCase);
+
+                if (isAdmin)
+                {
+                    TempData["Error"] = "Administrator accounts cannot be deactivated.";
+                    return RedirectToAction("Index", "Settings");
+                }
+
+                var vm = new UserUpdateViewModel
+                {
+                    UserId = user.UserId,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    FullName = user.FullName,
+                    PhoneNumber = user.PhoneNumber,
+                    RoleId = user.RoleId,
+                    IsActive = !user.IsActive // Soft Delete Toggle
+                };
+
+                await _userService.UpdateUserAsync(vm);
+
+                TempData["Success"] = $"Your account status has been updated to {(vm.IsActive ? "Active" : "Inactive")}.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            // Redirect back to Settings page
+            return RedirectToAction("Index", "Settings");
         }
     }
 }
