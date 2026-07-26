@@ -18,6 +18,7 @@ namespace LOCPS
                 path.StartsWith("/account/logout") ||
                 path.StartsWith("/account/accessdenied") ||
                 path.StartsWith("/home") ||
+                path.StartsWith("/api/") ||
                 path.Contains("favicon") ||
                 path.StartsWith("/css/") ||
                 path.StartsWith("/js/") ||
