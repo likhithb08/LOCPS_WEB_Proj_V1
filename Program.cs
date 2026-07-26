@@ -72,9 +72,16 @@ var app = builder.Build();
 // Seed the database on startup
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    await DbInitializer.InitializeAsync(context, logger);
+    try
+    {
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await DbInitializer.InitializeAsync(context, logger);
+    }
+    catch (Exception ex)
+    {
+        logger.LogWarning(ex, "Could not connect to database or seed data. Please ensure SQL Server is running and connection string in appsettings.json is valid.");
+    }
 }
 
 // Configure the HTTP request pipeline.
@@ -91,6 +98,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers();
 
 app.MapControllerRoute(
     name: "default",

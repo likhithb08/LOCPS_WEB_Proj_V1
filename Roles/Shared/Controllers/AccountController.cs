@@ -89,6 +89,28 @@ namespace LOCPS.Controllers
             }
         }
 
+        [HttpGet]
+        public IActionResult RegisterAdmin() => View();
+
+        [HttpPost]
+        public async Task<IActionResult> RegisterAdmin(UserCreateViewModel model)
+        {
+            model.RoleId = RoleConstants.AdminRoleId; // Ensure Admin RoleId = 2
+            if (!ModelState.IsValid) return View(model);
+
+            try
+            {
+                await _userService.RegisterUserAsync(model);
+                TempData["Success"] = "Admin registration successful. Please login.";
+                return RedirectToAction("Login");
+            }
+            catch (Exception e)
+            {
+                ViewBag.Error = e.Message;
+                return View(model);
+            }
+        }
+
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
