@@ -7,6 +7,10 @@
     <div class="col-sm-6">
         <h1 class="h3 fw-bold text-dark m-0">Loan Product Catalog</h1>
         <p class="text-muted mb-0">Manage all available loan product offerings and configurations.</p>
+        @if (ViewBag.Source != null)
+        {
+            <div class="mt-2"><span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class="fa-solid fa-plug me-1"></i> @ViewBag.Source</span></div>
+        }
     </div>
     <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
         <a asp-action="Create" class="btn btn-primary px-4 py-2" style="border-radius: var(--radius-md);"><i class="fa-solid fa-plus me-2"></i> Create New Product</a>
