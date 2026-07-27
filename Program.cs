@@ -24,6 +24,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LogoutPath = "/Account/Logout";
     });
 
+// Add HTTP Client and HttpContextAccessor for API consumption
+builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
+
 // Add MVC services (no API controllers)
 builder.Services.AddControllersWithViews(options =>
 {
