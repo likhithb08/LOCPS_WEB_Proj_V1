@@ -4,32 +4,31 @@
 }
 
 <aside id="sidebar" class="d-flex flex-column overflow-hidden" style="height:100vh">
-    <div class="sidebar-header">
-        <a href="/Home/Index" class="brand-logo">
+    <div class="sidebar-header d-flex align-items-center justify-content-between">
+        <a href="/Home/Index" class="brand-logo text-truncate">
             <i class="fa-solid fa-vault text-primary"></i>
-            <span>LOCPS</span> Portal
+            <span class="brand-text"><span>LOCPS</span> Portal</span>
         </a>
+        <button id="sidebarCollapseBtn" class="btn btn-link text-white-50 p-1 border-0 shadow-none d-none d-lg-block" style="font-size: 1.1rem;" title="Toggle Sidebar">
+            <i class="fa-solid fa-angle-left"></i>
+        </button>
     </div>
 
     <div class="nav-menu flex-grow-1 overflow-auto">
         <div class="nav-section">
-            <a href="/Dashboard" class="nav-link-item @(currentPath.StartsWith("/dashboard") ? "active" : "")">
+            <a href="/Dashboard" class="nav-link-item @(currentPath.StartsWith("/dashboard") ? "active" : "")" title="Dashboard">
                 <i class="fa-solid fa-chart-pie"></i>
-                Dashboard
+                <span>Dashboard</span>
             </a>
-            @* <a href="/Notification" class="nav-link-item @(currentPath.StartsWith("/notification") ? "active" : "")">
-                <i class="fa-solid fa-bell"></i>
-                Notifications
-            </a> *@
         </div>
 
         @if (activeRole == "customer")
         {
             <div class="nav-section">
                 <div class="nav-heading">My Services</div>
-                <a href="/Customer/Create" class="nav-link-item @(currentPath.StartsWith("/customer/create") ? "active" : "")">
+                <a href="/Customer/Create" class="nav-link-item @(currentPath.StartsWith("/customer/create") ? "active" : "")" title="Apply for Loan">
                     <i class="fa-solid fa-file-signature"></i>
-                    Apply for Loan
+                    <span>Apply for Loan</span>
                 </a>
             </div>
         }
@@ -38,27 +37,13 @@
         {
             <div class="nav-section">
                 <div class="nav-heading">Customers & Loans</div>
-                <a href="/Customer" class="nav-link-item @(currentPath.StartsWith("/customer") ? "active" : "")">
+                <a href="/Customer" class="nav-link-item @(currentPath.StartsWith("/customer") ? "active" : "")" title="Customer Directory">
                     <i class="fa-solid fa-users"></i>
-                    Customer Directory
+                    <span>Customer Directory</span>
                 </a>
-                <a href="/Loan" class="nav-link-item @(currentPath.StartsWith("/loan") ? "active" : "")">
+                <a href="/Loan" class="nav-link-item @(currentPath.StartsWith("/loan") ? "active" : "")" title="Loan Applications">
                     <i class="fa-solid fa-file-invoice-dollar"></i>
-                    Loan Applications
-                </a>
-
-                <div class="nav-heading">Origination Steps</div>
-                <a href="/Kyc/Verify/9844" class="nav-link-item @(currentPath.StartsWith("/kyc") ? "active" : "")">
-                    <i class="fa-solid fa-id-card"></i>
-                    KYC Verification
-                </a>
-                <a href="/Credit/Evaluate/9844" class="nav-link-item @(currentPath.StartsWith("/credit") ? "active" : "")">
-                    <i class="fa-solid fa-gauge-high"></i>
-                    Credit Evaluation
-                </a>
-                <a href="/Document/Validate/9844" class="nav-link-item @(currentPath.Contains("/document/validate") ? "active" : "")">
-                    <i class="fa-solid fa-file-shield"></i>
-                    Document Validation
+                    <span>Loan Applications</span>
                 </a>
             </div>
         }
@@ -67,17 +52,17 @@
         {
             <div class="nav-section">
                 <div class="nav-heading">Credit Decisioning</div>
-                <a href="/Approval" class="nav-link-item @(currentPath.StartsWith("/approval") ? "active" : "")">
+                <a href="/Approval" class="nav-link-item @(currentPath.StartsWith("/approval") ? "active" : "")" title="Underwriter Review">
                     <i class="fa-solid fa-signature"></i>
-                    Underwriter Review
+                    <span>Underwriter Review</span>
                 </a>
-                <a href="/Disbursement" class="nav-link-item @(currentPath.Contains("/disbursement") && !currentPath.Contains("/history") ? "active" : "")">
+                <a href="/Disbursement" class="nav-link-item @(currentPath.Contains("/disbursement") && !currentPath.Contains("/history") ? "active" : "")" title="Initiate Disbursement">
                     <i class="fa-solid fa-hand-holding-dollar"></i>
-                    Initiate Disbursement
+                    <span>Initiate Disbursement</span>
                 </a>
-                <a href="/Disbursement/History" class="nav-link-item @(currentPath.Contains("/disbursement/history") ? "active" : "")">
+                <a href="/Disbursement/History" class="nav-link-item @(currentPath.Contains("/disbursement/history") ? "active" : "")" title="Disbursement History">
                     <i class="fa-solid fa-money-bill-transfer"></i>
-                    Disbursement History
+                    <span>Disbursement History</span>
                 </a>
             </div>
         }
@@ -86,31 +71,31 @@
         {
             <div class="nav-section">
                 <div class="nav-heading">Administration</div>
-                <a href="/Product" class="nav-link-item @(currentPath.StartsWith("/product") ? "active" : "")">
+                <a href="/Product" class="nav-link-item @(currentPath.StartsWith("/product") ? "active" : "")" title="Loan Products">
                     <i class="fa-solid fa-box-archive"></i>
-                    Loan Products
+                    <span>Loan Products</span>
                 </a>
-                <a href="/UserManagement" class="nav-link-item @(currentPath.StartsWith("/usermanagement") ? "active" : "")">
+                <a href="/UserManagement" class="nav-link-item @(currentPath.StartsWith("/usermanagement") ? "active" : "")" title="User Management">
                     <i class="fa-solid fa-user-shield"></i>
-                    User Management
+                    <span>User Management</span>
                 </a>
-                <a href="/Settings/ScoringRules" class="nav-link-item @(currentPath.Contains("/settings/scoringrules") ? "active" : "")">
+                <a href="/Settings/ScoringRules" class="nav-link-item @(currentPath.Contains("/settings/scoringrules") ? "active" : "")" title="Scoring Engine Weights">
                     <i class="fa-solid fa-sliders"></i>
-                    Scoring Engine Weights
+                    <span>Scoring Engine Weights</span>
                 </a>
-                <a href="/Settings/AuditLogs" class="nav-link-item @(currentPath.Contains("/settings/auditlogs") ? "active" : "")">
+                <a href="/Settings/AuditLogs" class="nav-link-item @(currentPath.Contains("/settings/auditlogs") ? "active" : "")" title="Audit Log Trail">
                     <i class="fa-solid fa-clock-rotate-left"></i>
-                    Audit Log Trail
+                    <span>Audit Log Trail</span>
                 </a>
 
                 <div class="nav-heading">Settlement & Reports</div>
-                <a href="/Disbursement/History" class="nav-link-item @(currentPath.Contains("/disbursement/history") ? "active" : "")">
+                <a href="/Disbursement/History" class="nav-link-item @(currentPath.Contains("/disbursement/history") ? "active" : "")" title="Disbursements">
                     <i class="fa-solid fa-hand-holding-dollar"></i>
-                    Disbursements
+                    <span>Disbursements</span>
                 </a>
-                <a href="/Reports" class="nav-link-item @(currentPath.StartsWith("/reports") ? "active" : "")">
+                <a href="/Reports" class="nav-link-item @(currentPath.StartsWith("/reports") ? "active" : "")" title="Reports & Analytics">
                     <i class="fa-solid fa-chart-line"></i>
-                    Reports & Analytics
+                    <span>Reports & Analytics</span>
                 </a>
             </div>
         }
@@ -118,8 +103,9 @@
 
     <div class="sidebar-footer">
         <div class="mt-3 text-center">
-            <a href="/Account/Logout" class="text-white-50 small text-decoration-none">
-                <i class="fa-solid fa-right-from-bracket me-1"></i> Sign Out
+            <a href="/Account/Logout" class="text-white-50 small text-decoration-none" title="Sign Out">
+                <i class="fa-solid fa-right-from-bracket me-1"></i>
+                <span class="brand-text">Sign Out</span>
             </a>
         </div>
     </div>

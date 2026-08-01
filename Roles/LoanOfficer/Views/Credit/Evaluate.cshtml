@@ -1,28 +1,72 @@
+@model LOCPS.Models.LoanApplication
 @{
     ViewData["Title"] = "Credit Evaluation & Scoring";
     ViewData["CurrentStep"] = "Credit Evaluation";
+    var credit = ViewBag.CreditEvaluation as LOCPS.Models.CreditEvaluation;
 }
 
 <div class="row mb-4">
-    <div class="col-12">
+    <div class="col-md-8">
         <h1 class="h3 fw-bold text-dark mb-1">Credit Evaluation Dashboard</h1>
-        <p class="text-muted">Inspect automated credit score analysis, debt indicators, and bureau matches.</p>
+        <p class="text-muted">Inspect credit score analysis for Application <strong>@Model.ApplicationNumber</strong>.</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a asp-controller="Loan" asp-action="Details" asp-route-id="@Model.ApplicationId" class="btn btn-light border rounded-pill px-4">
+            <i class="fa-solid fa-arrow-left me-2"></i>Back to Application
+        </a>
     </div>
 </div>
 
 @await Html.PartialAsync("_WorkflowStepper")
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <div class="row g-4">
     <div class="col-lg-5">
-        <div class="card border-0 shadow-sm text-center py-4 mb-4">
-            <h5 class="fw-bold text-dark mb-3">Bureau Credit Score (CIBIL)</h5>
-            <div class="mb-3">
-                <h1 class="display-3 fw-extrabold text-success mb-0">785</h1>
-                <div class="text-muted">out of 900</div>
+        @if (credit != null)
+        {
+            string scoreColor = credit.CreditScore >= 750 ? "success" : (credit.CreditScore >= 700 ? "info" : (credit.CreditScore >= 600 ? "warning" : "danger"));
+            string scoreLabel = credit.CreditScore >= 750 ? "Excellent — Low Risk" : (credit.CreditScore >= 700 ? "Good — Moderate Risk" : (credit.CreditScore >= 600 ? "Fair — Elevated Risk" : "Poor — High Risk"));
+            <div class="card border-0 shadow-sm text-center py-4 mb-4">
+                <h5 class="fw-bold text-dark mb-3">Bureau Credit Score (CIBIL)</h5>
+                <div class="mb-3">
+                    <h1 class="display-3 fw-extrabold text-@scoreColor mb-0">@credit.CreditScore</h1>
+                    <div class="text-muted">out of 900</div>
+                </div>
+                <div class="score-gauge-lbl text-@scoreColor fw-bold">@scoreLabel</div>
+                <span class="text-muted small mt-2 d-block">Evaluated: @credit.EvaluatedDate?.ToString("yyyy-MM-dd HH:mm:ss")</span>
             </div>
-            <div class="score-gauge-lbl text-success fw-bold">Excellent — Low Risk</div>
-            <span class="text-muted small mt-2 d-block">Bureau Pull Timestamp: 2026-06-24 14:30:00</span>
-        </div>
+        }
+        else
+        {
+            <div class="card border-0 shadow-sm text-center py-5 mb-4">
+                <i class="fa-solid fa-magnifying-glass-chart fa-3x mb-3 text-muted opacity-50"></i>
+                <h6 class="text-muted">Credit evaluation not yet performed.</h6>
+                <p class="text-muted small mb-3">Complete KYC verification to unlock credit evaluation.</p>
+                @if (Model.Status >= LOCPS.Enums.ApplicationStatus.KYCVerified)
+                {
+                    <form asp-controller="Credit" asp-action="Evaluate" method="post" class="d-inline">
+                        <input type="hidden" name="applicationId" value="@Model.ApplicationId" />
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                            <i class="fa-solid fa-bolt me-1"></i> Run Evaluation
+                        </button>
+                    </form>
+                }
+            </div>
+        }
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-0 py-3"><h6 class="fw-bold text-dark m-0">Bureau Score Ranges</h6></div>
             <div class="card-body pt-0" style="font-size: 0.85rem;">
@@ -34,53 +78,65 @@
         </div>
     </div>
     <div class="col-lg-7">
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white border-0 py-3"><h5 class="card-title fw-bold text-dark m-0">Core Risk Metrics Analysis</h5></div>
-            <div class="card-body pt-0">
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between mb-1 small"><span class="text-muted fw-semibold">Debt-to-Income Ratio (DTI)</span><span class="fw-bold text-success">32.4% (Optimal)</span></div>
-                    <div class="progress" style="height: 8px;"><div class="progress-bar bg-success" style="width: 32.4%;"></div></div>
-                </div>
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between mb-1 small"><span class="text-muted fw-semibold">Repayment Track Record</span><span class="fw-bold text-success">98.5% On-Time</span></div>
-                    <div class="progress" style="height: 8px;"><div class="progress-bar bg-success" style="width: 98.5%;"></div></div>
-                </div>
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between mb-1 small"><span class="text-muted fw-semibold">Credit Card Utilization Rate</span><span class="fw-bold text-warning">48.2% (Moderate)</span></div>
-                    <div class="progress" style="height: 8px;"><div class="progress-bar bg-warning" style="width: 48.2%;"></div></div>
-                </div>
-            </div>
-        </div>
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-0 py-3"><h5 class="card-title fw-bold text-dark m-0">Rule Validation Engine</h5></div>
-            <div class="card-body">
-                <div class="d-flex flex-column gap-3">
-                    <div class="p-3 bg-light rounded" style="border-radius: var(--radius-md);">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="fw-semibold small text-dark"><i class="fa-solid fa-calculator me-1"></i> Scoring Engine Evaluation</span>
-                            <span class="badge bg-success rounded">Passed</span>
-                        </div>
-                        <p class="small text-muted mb-0">All credit thresholds verified. Final pricing tier: Tier A eligibility confirmed.</p>
+        @if (credit != null)
+        {
+            string dtiColor = credit.DebitToIncomeRatio < 40 ? "success" : (credit.DebitToIncomeRatio < 50 ? "warning" : "danger");
+            string dtiLabel = credit.DebitToIncomeRatio < 40 ? "Optimal" : (credit.DebitToIncomeRatio < 50 ? "Moderate" : "High");
+            string paymentColor = credit.PaymentHistoryScore >= 95 ? "success" : (credit.PaymentHistoryScore >= 80 ? "warning" : "danger");
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 py-3"><h5 class="card-title fw-bold text-dark m-0">Core Risk Metrics Analysis</h5></div>
+                <div class="card-body pt-0">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-1 small"><span class="text-muted fw-semibold">Debt-to-Income Ratio (DTI)</span><span class="fw-bold text-@dtiColor">@credit.DebitToIncomeRatio.ToString("F1")% (@dtiLabel)</span></div>
+                        <div class="progress" style="height: 8px;"><div class="progress-bar bg-@dtiColor" style="width: @Math.Min(credit.DebitToIncomeRatio, 100)%;"></div></div>
                     </div>
-                    <div class="p-3 bg-light rounded" style="border-radius: var(--radius-md);">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="fw-semibold small text-dark"><i class="fa-solid fa-shield-halved me-1"></i> DTI Compliance Rule</span>
-                            <span class="badge bg-success rounded">Passed</span>
-                        </div>
-                        <p class="small text-muted mb-0">Debt-to-Income ratio 32.4% is within safe threshold (&lt; 40%).</p>
-                    </div>
-                    <div class="p-3 bg-light rounded" style="border-radius: var(--radius-md);">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="fw-semibold small text-dark"><i class="fa-solid fa-chart-line me-1"></i> Repayment History Rule</span>
-                            <span class="badge bg-success rounded">Passed</span>
-                        </div>
-                        <p class="small text-muted mb-0">98.5% on-time repayment record exceeds minimum 95% requirement.</p>
-                    </div>
-                    <div class="mt-2">
-                        <a href="/Dashboard" class="btn btn-success py-2 px-4">Save & Continue <i class="fa-solid fa-arrow-right ms-2"></i></a>
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-1 small"><span class="text-muted fw-semibold">Payment History Score</span><span class="fw-bold text-@paymentColor">@credit.PaymentHistoryScore% On-Time</span></div>
+                        <div class="progress" style="height: 8px;"><div class="progress-bar bg-@paymentColor" style="width: @Math.Min(credit.PaymentHistoryScore, 100)%;"></div></div>
                     </div>
                 </div>
             </div>
-        </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3"><h5 class="card-title fw-bold text-dark m-0">Credit Recommendation</h5></div>
+                <div class="card-body">
+                    <div class="d-flex flex-column gap-3">
+                        <div class="p-3 bg-light rounded" style="border-radius: var(--radius-md);">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-semibold small text-dark"><i class="fa-solid fa-calculator me-1"></i> Scoring Engine Evaluation</span>
+                                <span class="badge bg-@(credit.CreditRecommendation == LOCPS.Enums.CreditRecommendation.Approved ? "success" : "danger") rounded">
+                                    @credit.CreditRecommendation.ToString()
+                                </span>
+                            </div>
+                            <p class="small text-muted mb-0">
+                                Credit Score: @credit.CreditScore | DTI: @credit.DebitToIncomeRatio.ToString("F1")% | Payment History: @credit.PaymentHistoryScore%
+                            </p>
+                        </div>
+                        <div class="p-3 bg-light rounded" style="border-radius: var(--radius-md);">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-semibold small text-dark"><i class="fa-solid fa-shield-halved me-1"></i> DTI Compliance Rule</span>
+                                <span class="badge bg-@(credit.DebitToIncomeRatio < 40 ? "success" : "danger") rounded">@(credit.DebitToIncomeRatio < 40 ? "Passed" : "Failed")</span>
+                            </div>
+                            <p class="small text-muted mb-0">Debt-to-Income ratio @credit.DebitToIncomeRatio.ToString("F1")% @(credit.DebitToIncomeRatio < 40 ? "is within" : "exceeds") safe threshold (&lt; 40%).</p>
+                        </div>
+                        <div class="p-3 bg-light rounded" style="border-radius: var(--radius-md);">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-semibold small text-dark"><i class="fa-solid fa-chart-line me-1"></i> Payment History Rule</span>
+                                <span class="badge bg-@(credit.PaymentHistoryScore >= 95 ? "success" : "danger") rounded">@(credit.PaymentHistoryScore >= 95 ? "Passed" : "Failed")</span>
+                            </div>
+                            <p class="small text-muted mb-0">@credit.PaymentHistoryScore% on-time repayment record @(credit.PaymentHistoryScore >= 95 ? "exceeds" : "is below") minimum 95% requirement.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="fa-solid fa-chart-bar fa-3x mb-3 text-muted opacity-50"></i>
+                    <h6 class="text-muted">Risk metrics will appear once credit evaluation is run.</h6>
+                </div>
+            </div>
+        }
     </div>
 </div>

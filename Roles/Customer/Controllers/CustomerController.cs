@@ -48,6 +48,18 @@ namespace LOCPS.Controllers
 
         public async Task<IActionResult> Create()
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var customerId = int.TryParse(userId, out var id) ? id : 0;
+            if (customerId > 0)
+            {
+                var activeApp = await _loanApplicationService.GetActiveApplicationAsync(customerId);
+                if (activeApp != null)
+                {
+                    TempData["Error"] = $"You already have an active loan application ({activeApp.ApplicationNumber}) in progress with status '{activeApp.Status}'. You cannot submit a new application until your current application is Disbursed, Rejected, or Closed.";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
             var products = await _loanProductService.GetAllAsync(true);
             var productList = products.ToList();
             ViewBag.Products = new SelectList(productList, "ProductId", "ProductName");
@@ -171,6 +183,17 @@ namespace LOCPS.Controllers
         {
             try
             {
+                var application = await _loanApplicationService.GetByIdAsync(applicationId);
+                if (application == null) return NotFound();
+
+                if (application.Status == ApplicationStatus.Approved ||
+                    application.Status == ApplicationStatus.Disbursed ||
+                    application.Status == ApplicationStatus.Closed)
+                {
+                    TempData["Error"] = "Document upload is disabled because the application has already been approved or completed.";
+                    return RedirectToAction(nameof(Details), new { id = applicationId });
+                }
+
                 if (file == null || file.Length == 0)
                 {
                     TempData["Error"] = "Please select a file to upload.";

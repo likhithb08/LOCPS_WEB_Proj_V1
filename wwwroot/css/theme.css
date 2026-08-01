@@ -551,7 +551,41 @@ h1, h2, h3, h4, h5, h6,
     z-index: 100;
 }
 
-/* Responsive sidebar behaviors */
+/* Responsive Enhancements across Viewports */
+
+@media (max-width: 1366px) {
+    :root {
+        --sidebar-width: 240px;
+    }
+
+    #content {
+        padding: 1.5rem 1.75rem;
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .table th, .table td {
+        padding: 0.85rem 1rem;
+    }
+}
+
+@media (max-width: 1199.98px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+    }
+}
+
 @media (max-width: 991.98px) {
     #sidebar {
         left: calc(-1 * var(--sidebar-width));
@@ -571,101 +605,13 @@ h1, h2, h3, h4, h5, h6,
     }
     
     #content {
-        padding: 1.5rem 1.25rem;
+        padding: 1.25rem 1rem;
+    }
+
+    .sticky-decision-bar {
+        padding: 1rem;
     }
 }
-
-/* Dark Mode Sidebar Elements */
-.role-dropdown-select {
-    background-color: var(--secondary-navy-light);
-    color: var(--surface-white);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    font-size: 0.85rem;
-    padding: 0.45rem 0.75rem;
-    border-radius: var(--radius-sm);
-}
-
-.role-dropdown-select:focus {
-    outline: none;
-    border-color: #3B82F6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
-}
-
-/* EMI calculator card */
-.emi-calculator-card {
-    background: linear-gradient(135deg, var(--secondary-navy) 0%, var(--secondary-navy-light) 100%);
-    color: var(--surface-white);
-}
-
-.emi-calculator-card .border-bottom {
-    border-bottom-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-/* Custom Table Layouts */
-.table-responsive {
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-    background-color: var(--surface-white);
-}
-
-.table {
-    margin-bottom: 0;
-}
-
-.table th {
-    background-color: #F8FAFC;
-    color: #475569;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.table td {
-    padding: 1.15rem 1.5rem;
-    vertical-align: middle;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-main);
-    font-size: 0.875rem;
-}
-
-.table tr:last-child td {
-    border-bottom: none;
-}
-
-/* Score Gauge styling */
-.score-gauge-container {
-    position: relative;
-    width: 200px;
-    height: 100px;
-    margin: 0 auto;
-    overflow: hidden;
-}
-
-.score-gauge-val {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 2.25rem;
-    font-weight: 800;
-    color: var(--secondary-navy);
-}
-
-.score-gauge-lbl {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    font-weight: 700;
-    text-align: center;
-    margin-top: 0.25rem;
-}
-
-
 
 @media (max-width: 767.98px) {
     .stepper {
@@ -688,3 +634,72 @@ h1, h2, h3, h4, h5, h6,
         font-size: 0.875rem !important;
     }
 }
+
+@media (max-width: 575.98px) {
+    #content {
+        padding: 1rem 0.75rem;
+    }
+
+    .btn-mobile-full {
+        width: 100%;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+    }
+}
+
+/* Sidebar Collapse & Expand Rules */
+#sidebar, #wrapper, #sidebarCollapseBtn i {
+    transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.sidebar-collapsed {
+    --sidebar-width: 70px;
+}
+
+body.sidebar-collapsed #sidebar .brand-logo {
+    justify-content: center;
+    padding: 0;
+}
+
+body.sidebar-collapsed #sidebar .brand-text {
+    display: none;
+}
+
+body.sidebar-collapsed #sidebar .nav-heading {
+    display: none;
+}
+
+body.sidebar-collapsed #sidebar .nav-link-item {
+    justify-content: center;
+    padding: 0.75rem 0;
+    margin: 0.2rem 0.5rem;
+}
+
+body.sidebar-collapsed #sidebar .nav-link-item span {
+    display: none;
+}
+
+body.sidebar-collapsed #sidebarCollapseBtn i {
+    transform: rotate(180deg);
+}
+
+body.sidebar-collapsed #sidebar .sidebar-footer {
+    padding: 1rem 0.25rem;
+    text-align: center;
+}
+
+body.sidebar-collapsed #sidebar .sidebar-footer a span {
+    display: none;
+}
+
+#sidebarCollapseBtn {
+    color: rgba(255, 255, 255, 0.5);
+    transition: color 0.2s ease;
+}
+
+#sidebarCollapseBtn:hover {
+    color: #ffffff;
+}
+

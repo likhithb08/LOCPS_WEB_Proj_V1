@@ -1,4 +1,4 @@
-﻿using LOCPS.Common;
+using LOCPS.Common;
 using LOCPS.Enums;
 using LOCPS.Models;
 
@@ -16,5 +16,6 @@ namespace LOCPS.Repositories.Interfaces
         Task<IEnumerable<LoanApplication>> GetApplicationsCreatedByUserId(int userId);
         Task<PagedResult<LoanApplication>> SearchAsync(PagedQuery query, ApplicationStatus? status = null, int? customerId = null);
         Task<LoanApplication?> GetWithDetailsAsync(int id);
+        Task<LoanApplication?> GetActiveApplicationByCustomerIdAsync(int customerId);
     }
 }

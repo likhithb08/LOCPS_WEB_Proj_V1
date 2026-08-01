@@ -1,4 +1,4 @@
-﻿using LOCPS.Common;
+using LOCPS.Common;
 using LOCPS.Data;
 using LOCPS.Enums;
 using LOCPS.Models;
@@ -99,5 +99,12 @@ namespace LOCPS.Repositories.Implementation
                 .Include(la => la.Product)
                 .Include(la => la.CreatedBy)
                 .FirstOrDefaultAsync(la => la.ApplicationId == id);
+
+        public async Task<LoanApplication?> GetActiveApplicationByCustomerIdAsync(int customerId) =>
+            await _context.LoanApplications
+                .FirstOrDefaultAsync(la => la.CustomerId == customerId &&
+                                           la.Status != ApplicationStatus.Disbursed &&
+                                           la.Status != ApplicationStatus.Rejected &&
+                                           la.Status != ApplicationStatus.Closed);
     }
 }

@@ -27,6 +27,11 @@ public class LoanApplicationService : ILoanApplicationService
 
     public async Task<LoanApplication> CreateAsync(LoanApplication application)
     {
+        if (await HasActiveApplicationAsync(application.CustomerId))
+        {
+            throw new ServiceException("You already have an active loan application in progress. You cannot submit a new application until your current application is Disbursed or Rejected.", 400);
+        }
+
         var product = await _productRepository.GetLoanProductByIdAsync(application.ProductId)
             ?? throw new ServiceException("Invalid loan product.", 400);
 
@@ -44,6 +49,15 @@ public class LoanApplicationService : ILoanApplicationService
         await _notificationService.CreateAsync(application.CustomerId, NotificationType.ApplicationSubmitted, "Loan Application Submitted", $"Application {created.ApplicationNumber} submitted.", created.ApplicationId);
         return created;
     }
+
+    public async Task<bool> HasActiveApplicationAsync(int customerId)
+    {
+        var active = await _repository.GetActiveApplicationByCustomerIdAsync(customerId);
+        return active != null;
+    }
+
+    public async Task<LoanApplication?> GetActiveApplicationAsync(int customerId) =>
+        await _repository.GetActiveApplicationByCustomerIdAsync(customerId);
 
     public async Task<LoanApplication?> GetByIdAsync(int id) => await _repository.GetWithDetailsAsync(id);
 

@@ -6,20 +6,49 @@ namespace LOCPS.Controllers
     public class CreditController : Controller
     {
         private readonly ICreditEvaluationService _creditService;
+        private readonly ILoanApplicationService _loanApplicationService;
 
-        public CreditController(ICreditEvaluationService creditService)
+        public CreditController(ICreditEvaluationService creditService, ILoanApplicationService loanApplicationService)
         {
             _creditService = creditService;
+            _loanApplicationService = loanApplicationService;
         }
 
         [HttpGet]
-        public IActionResult Evaluate() => View();
+        public async Task<IActionResult> Evaluate(int id)
+        {
+            var application = await _loanApplicationService.GetByIdAsync(id);
+            if (application == null)
+            {
+                TempData["Error"] = "Application not found.";
+                return RedirectToAction("Index", "Loan");
+            }
+
+            var credit = await _creditService.GetByApplicationIdAsync(id);
+            ViewBag.CreditEvaluation = credit;
+
+            return View(application);
+        }
 
         [HttpGet]
-        public IActionResult Details(int id) => View();
+        public async Task<IActionResult> Details(int id)
+        {
+            var application = await _loanApplicationService.GetByIdAsync(id);
+            if (application == null)
+            {
+                TempData["Error"] = "Application not found.";
+                return RedirectToAction("Index", "Loan");
+            }
+
+            var credit = await _creditService.GetByApplicationIdAsync(id);
+            ViewBag.CreditEvaluation = credit;
+
+            return View(application);
+        }
 
         [HttpPost]
-        public async Task<IActionResult> Evaluate(int applicationId)
+        [ActionName("Evaluate")]
+        public async Task<IActionResult> EvaluatePost(int applicationId)
         {
             try
             {

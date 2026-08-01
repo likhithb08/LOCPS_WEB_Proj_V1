@@ -7,14 +7,29 @@ namespace LOCPS.Controllers
     public class DocumentController : Controller
     {
         private readonly IDocumentService _documentService;
+        private readonly ILoanApplicationService _loanApplicationService;
 
-        public DocumentController(IDocumentService documentService)
+        public DocumentController(IDocumentService documentService, ILoanApplicationService loanApplicationService)
         {
             _documentService = documentService;
+            _loanApplicationService = loanApplicationService;
         }
 
         [HttpGet]
-        public IActionResult Validate(int id) => View();
+        public async Task<IActionResult> Validate(int id)
+        {
+            var application = await _loanApplicationService.GetByIdAsync(id);
+            if (application == null)
+            {
+                TempData["Error"] = "Application not found.";
+                return RedirectToAction("Index", "Loan");
+            }
+
+            var documents = await _documentService.GetByApplicationIdAsync(id);
+            ViewBag.Documents = documents;
+
+            return View(application);
+        }
 
         [HttpGet]
         public IActionResult Upload(int id) => View();

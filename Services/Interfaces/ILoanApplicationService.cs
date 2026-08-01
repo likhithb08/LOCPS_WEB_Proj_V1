@@ -12,5 +12,7 @@ public interface ILoanApplicationService
     Task<LoanApplication> UpdateAsync(LoanApplication application);
     Task<bool> DeleteAsync(int id);
     Task<LoanApplication> UpdateStatusAsync(int applicationId, ApplicationStatus status, int actorUserId);
+    Task<bool> HasActiveApplicationAsync(int customerId);
+    Task<LoanApplication?> GetActiveApplicationAsync(int customerId);
     string GenerateApplicationNumber();
 }

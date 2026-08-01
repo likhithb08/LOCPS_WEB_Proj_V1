@@ -18,7 +18,23 @@ namespace LOCPS.Controllers
         }
 
         [HttpGet]
-        public IActionResult Verify(int id) => View();
+        public async Task<IActionResult> Verify(int id)
+        {
+            var application = await _loanApplicationService.GetByIdAsync(id);
+            if (application == null)
+            {
+                TempData["Error"] = "Application not found.";
+                return RedirectToAction("Index", "Loan");
+            }
+
+            var kyc = await _kycService.GetByApplicationIdAsync(id);
+            var documents = await _documentService.GetByApplicationIdAsync(id);
+
+            ViewBag.Kyc = kyc;
+            ViewBag.Documents = documents;
+
+            return View(application);
+        }
 
         [HttpGet]
         public IActionResult History(int id) => View();

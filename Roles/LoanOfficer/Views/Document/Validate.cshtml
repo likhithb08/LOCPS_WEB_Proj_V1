@@ -1,76 +1,135 @@
+@model LOCPS.Models.LoanApplication
 @{
     ViewData["Title"] = "Document Validation";
     ViewData["CurrentStep"] = "Document Validation";
+    var docs = ViewBag.Documents as IEnumerable<LOCPS.Models.Document> ?? new List<LOCPS.Models.Document>();
 }
 
 <div class="row mb-4">
-    <div class="col-12">
+    <div class="col-md-8">
         <h1 class="h3 fw-bold text-dark mb-1">Document Validation Desk</h1>
-        <p class="text-muted">Review, accept or reject uploaded documents for Application <strong>LOC-9844-32</strong>.</p>
+        <p class="text-muted">Review, accept or reject uploaded documents for Application <strong>@Model.ApplicationNumber</strong>.</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a asp-controller="Loan" asp-action="Details" asp-route-id="@Model.ApplicationId" class="btn btn-light border rounded-pill px-4">
+            <i class="fa-solid fa-arrow-left me-2"></i>Back to Application
+        </a>
     </div>
 </div>
 
 @await Html.PartialAsync("_WorkflowStepper")
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
         <h5 class="card-title fw-bold m-0">Submitted Documents Review Queue</h5>
-        <span class="badge bg-success rounded-pill px-3">All Reviewed</span>
+        @{
+            var pendingCount = docs.Count(d => d.DocumentStatus == LOCPS.Enums.DocumentStatus.Pending);
+        }
+        <span class="badge bg-@(pendingCount == 0 ? "success" : "warning text-dark") rounded-pill px-3">
+            @(pendingCount == 0 ? "All Reviewed" : $"{pendingCount} Pending Review")
+        </span>
     </div>
     <div class="card-body p-0">
-        <div class="table-responsive border-0">
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th>Document Name</th>
-                        <th>Category</th>
-                        <th>File Type</th>
-                        <th>Upload Date</th>
-                        <th>Validation Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><i class="fa-solid fa-file-pdf text-danger me-2"></i><span class="fw-semibold">PAN_Card_Rajesh_Kumar.pdf</span></td>
-                        <td>Identity</td>
-                        <td><span class="badge bg-light text-secondary border">PDF</span></td>
-                        <td>2026-06-24</td>
-                        <td><span class="badge bg-success">Approved</span></td>
-                    </tr>
-                    <tr>
-                        <td><i class="fa-solid fa-file-pdf text-danger me-2"></i><span class="fw-semibold">Salary_Slip_May_2026.pdf</span></td>
-                        <td>Income Proof</td>
-                        <td><span class="badge bg-light text-secondary border">PDF</span></td>
-                        <td>2026-06-24</td>
-                        <td><span class="badge bg-success">Approved</span></td>
-                    </tr>
-                    <tr>
-                        <td><i class="fa-solid fa-file-pdf text-danger me-2"></i><span class="fw-semibold">Bank_Statement_HDFC_Jan_Jun.pdf</span></td>
-                        <td>Bank Statement</td>
-                        <td><span class="badge bg-light text-secondary border">PDF</span></td>
-                        <td>2026-06-24</td>
-                        <td><span class="badge bg-success">Approved</span></td>
-                    </tr>
-                    <tr>
-                        <td><i class="fa-solid fa-file-pdf text-danger me-2"></i><span class="fw-semibold">Property_Title_Deed_Bangalore.pdf</span></td>
-                        <td>Property Docs</td>
-                        <td><span class="badge bg-light text-secondary border">PDF</span></td>
-                        <td>2026-06-24</td>
-                        <td><span class="badge bg-success">Approved</span></td>
-                    </tr>
-                    <tr>
-                        <td><i class="fa-solid fa-file-pdf text-danger me-2"></i><span class="fw-semibold">Employer_Letter_TechCorp.pdf</span></td>
-                        <td>Employer Letter</td>
-                        <td><span class="badge bg-light text-secondary border">PDF</span></td>
-                        <td>2026-06-24</td>
-                        <td><span class="badge bg-warning text-dark">Pending Review</span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        @if (!docs.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="fa-solid fa-folder-open fa-3x mb-3 text-light"></i>
+                <p class="mb-0">No documents uploaded for this application.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive border-0">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th style="min-width: 250px;">Document Name</th>
+                            <th>Category</th>
+                            <th>Upload Date</th>
+                            <th>Validation Status</th>
+                            <th style="min-width: 320px;">Remarks & Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var doc in docs)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-file-pdf text-danger fs-5"></i>
+                                        <div>
+                                            <a href="~/@doc.FilePath" target="_blank" class="text-decoration-none fw-semibold text-dark d-block text-truncate" style="max-width: 220px;" title="@doc.FileName">
+                                                @doc.FileName
+                                            </a>
+                                            <span class="text-muted small">@((doc.FileSize / 1024.0).ToString("F1")) KB</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-secondary border">@doc.DocumentType.ToString()</span>
+                                </td>
+                                <td>
+                                    <span class="text-muted small">@doc.UploadDate.ToString("yyyy-MM-dd")</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-@(doc.DocumentStatus == LOCPS.Enums.DocumentStatus.Verified ? "success" : (doc.DocumentStatus == LOCPS.Enums.DocumentStatus.Rejected ? "danger" : "warning text-dark")) px-2.5 py-1.5 rounded-pill">
+                                        @doc.DocumentStatus.ToString()
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (doc.DocumentStatus == LOCPS.Enums.DocumentStatus.Pending)
+                                    {
+                                        <form asp-controller="Document" asp-action="Verify" method="post" class="m-0">
+                                            <input type="hidden" name="documentId" value="@doc.DocumentId" />
+                                            <input type="hidden" name="applicationId" value="@Model.ApplicationId" />
+                                            <div class="d-flex gap-2">
+                                                <input type="text" name="remarks" class="form-control form-control-sm shadow-none" placeholder="Verification remarks..." style="font-size: 0.8rem;" />
+                                                <button type="submit" name="status" value="@LOCPS.Enums.DocumentStatus.Verified" class="btn btn-sm btn-success px-3 d-flex align-items-center gap-1"><i class="fa-solid fa-check"></i> Accept</button>
+                                                <button type="submit" name="status" value="@LOCPS.Enums.DocumentStatus.Rejected" class="btn btn-sm btn-danger px-3 d-flex align-items-center gap-1"><i class="fa-solid fa-xmark"></i> Reject</button>
+                                            </div>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <div class="small text-muted">
+                                            @if (!string.IsNullOrEmpty(doc.Remarks))
+                                            {
+                                                <i class="fa-solid fa-comment-dots me-1"></i><strong>Remarks:</strong> @doc.Remarks
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted italic">No remarks</span>
+                                            }
+                                        </div>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
     </div>
     <div class="card-footer bg-white border-0 py-3 d-flex justify-content-between align-items-center">
         <span class="text-muted small">All mandatory documents must be accepted before underwriting.</span>
-        <a href="/Credit/Evaluate/9844" class="btn btn-success px-4"><i class="fa-solid fa-check-double me-2"></i> Approve All & Forward</a>
+        <div class="d-flex gap-2">
+            <a asp-controller="Loan" asp-action="Details" asp-route-id="@Model.ApplicationId" class="btn btn-light border px-4">Back to Details</a>
+            <a href="/Credit/Evaluate/@Model.ApplicationId" class="btn btn-success px-4"><i class="fa-solid fa-chevron-right me-2"></i> Proceed to Credit</a>
+        </div>
     </div>
 </div>

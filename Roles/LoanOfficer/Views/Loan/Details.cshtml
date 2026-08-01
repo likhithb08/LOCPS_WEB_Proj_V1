@@ -105,8 +105,9 @@
             <!-- KYC & Documents Tab -->
             <div class="tab-pane fade show active" id="kyc" role="tabpanel">
                 <div class="card shadow-sm border-0 rounded-4 mb-4">
-                    <div class="card-header bg-white border-bottom py-3">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
                         <h5 class="fw-bold text-dark m-0">KYC Verification</h5>
+                        <a href="/Kyc/Verify/@Model.ApplicationId" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fa-solid fa-expand me-1"></i> Open Verification</a>
                     </div>
                     <div class="card-body p-4">
                         @if (kyc == null)
@@ -164,8 +165,9 @@
                 </div>
 
                 <div class="card shadow-sm border-0 rounded-4">
-                    <div class="card-header bg-white border-bottom py-3">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
                         <h5 class="fw-bold text-dark m-0">Uploaded Documents</h5>
+                        <a href="/Document/Validate/@Model.ApplicationId" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fa-solid fa-expand me-1"></i> Open Validation</a>
                     </div>
                     <div class="card-body p-0">
                         @if (!docs.Any())
@@ -230,15 +232,21 @@
                 <div class="card shadow-sm border-0 rounded-4">
                     <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
                         <h5 class="fw-bold text-dark m-0">Credit Engine Evaluation</h5>
-                        @if (credit == null && Model.Status >= LOCPS.Enums.ApplicationStatus.KYCVerified)
-                        {
-                            <form asp-controller="Credit" asp-action="Evaluate" method="post">
-                                <input type="hidden" name="applicationId" value="@Model.ApplicationId" />
-                                <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
-                                    <i class="fa-solid fa-bolt me-1"></i> Run Evaluation
-                                </button>
-                            </form>
-                        }
+                        <div class="d-flex align-items-center gap-2">
+                            @if (credit != null)
+                            {
+                                <a href="/Credit/Evaluate/@Model.ApplicationId" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fa-solid fa-expand me-1"></i> Open Evaluation</a>
+                            }
+                            @if (credit == null && Model.Status >= LOCPS.Enums.ApplicationStatus.KYCVerified)
+                            {
+                                <form asp-controller="Credit" asp-action="Evaluate" method="post" class="m-0">
+                                    <input type="hidden" name="applicationId" value="@Model.ApplicationId" />
+                                    <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
+                                        <i class="fa-solid fa-bolt me-1"></i> Run Evaluation
+                                    </button>
+                                </form>
+                            }
+                        </div>
                     </div>
                     <div class="card-body p-4">
                         @if (credit == null)

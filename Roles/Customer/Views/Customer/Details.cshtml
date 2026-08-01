@@ -44,7 +44,7 @@
             </div>
             <div class="card-body pt-0">
                 <div class="row g-3">
-                    <div class="col-md-6 col-lg-3">
+                    <div class="col-6 col-sm-6 col-xl-3">
                         <div class="bg-light p-3 rounded-4 text-center">
                             <span class="text-muted small">Requested Amount</span>
                             <h4 class="fw-bold text-dark mt-1">₹ @Model.RequestedAmount.ToString("N0")</h4>
@@ -52,20 +52,20 @@
                     </div>
                     @if (Model.ApprovedAmount.HasValue)
                     {
-                        <div class="col-md-6 col-lg-3">
+                        <div class="col-6 col-sm-6 col-xl-3">
                             <div class="bg-light p-3 rounded-4 text-center">
                                 <span class="text-muted small">Approved Amount</span>
                                 <h4 class="fw-bold text-success mt-1">₹ @Model.ApprovedAmount.Value.ToString("N0")</h4>
                             </div>
                         </div>
                     }
-                    <div class="col-md-6 col-lg-3">
+                    <div class="col-6 col-sm-6 col-xl-3">
                         <div class="bg-light p-3 rounded-4 text-center">
                             <span class="text-muted small">Annual Income</span>
                             <h4 class="fw-bold text-primary mt-1">₹ @Model.AnnualIncome.ToString("N0")</h4>
                         </div>
                     </div>
-                    <div class="col-md-6 col-lg-3">
+                    <div class="col-6 col-sm-6 col-xl-3">
                         <div class="bg-light p-3 rounded-4 text-center">
                             <span class="text-muted small">Employment Type</span>
                             <h4 class="fw-bold text-dark mt-1">@Model.EmploymentType</h4>
@@ -153,26 +153,31 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm mb-4 rounded-4">
-                <div class="card-header bg-white border-0 py-3">
-                    <h5 class="card-title fw-bold text-dark m-0">Upload Documents</h5>
+            @if (Model.Status != LOCPS.Enums.ApplicationStatus.Approved && 
+                 Model.Status != LOCPS.Enums.ApplicationStatus.Disbursed && 
+                 Model.Status != LOCPS.Enums.ApplicationStatus.Closed)
+            {
+                <div class="card border-0 shadow-sm mb-4 rounded-4">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="card-title fw-bold text-dark m-0">Upload Documents</h5>
+                    </div>
+                    <div class="card-body pt-0">
+                        <form asp-action="UploadDocument" method="post" enctype="multipart/form-data" class="d-flex flex-column flex-sm-row gap-3 align-items-sm-end">
+                            <input type="hidden" name="applicationId" value="@Model.ApplicationId" />
+                            <div class="flex-grow-1">
+                                <select name="documentType" class="form-select mb-2" required>
+                                    <option value="">Select Document Type</option>
+                                    <option value="IdentityProof">Identity Proof</option>
+                                    <option value="AddressProof">Address Proof</option>
+                                    <option value="IncomeProof">Income Proof</option>
+                                </select>
+                                <input type="file" name="file" class="form-control" required accept=".pdf,.jpg,.jpeg,.png" />
+                            </div>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm mt-2 mt-sm-0">Upload</button>
+                        </form>
+                    </div>
                 </div>
-                <div class="card-body pt-0">
-                    <form asp-action="UploadDocument" method="post" enctype="multipart/form-data" class="d-flex gap-3 align-items-center">
-                        <input type="hidden" name="applicationId" value="@Model.ApplicationId" />
-                        <div class="flex-grow-1">
-                            <select name="documentType" class="form-select mb-2" required>
-                                <option value="">Select Document Type</option>
-                                <option value="IdentityProof">Identity Proof</option>
-                                <option value="AddressProof">Address Proof</option>
-                                <option value="IncomeProof">Income Proof</option>
-                            </select>
-                            <input type="file" name="file" class="form-control" required accept=".pdf,.jpg,.jpeg,.png" />
-                        </div>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm align-self-end h-100">Upload</button>
-                    </form>
-                </div>
-            </div>
+            }
         }
         else
         {

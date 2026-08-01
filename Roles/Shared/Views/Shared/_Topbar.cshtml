@@ -1,5 +1,6 @@
 @using System.Security.Claims
 @inject LOCPS.Data.AppDbContext _context
+@inject LOCPS.Services.Interfaces.INotificationService _notificationService
 
 @{
     var activeRole = Context.Request.Cookies["locps_demo_role"] ?? "officer";
@@ -15,10 +16,17 @@
 
     // 2. Safely attempt to overwrite the generic placeholder name with the real DB name
     var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var notifications = new List<LOCPS.Models.Notification>();
+    var unreadCount = 0;
 
     // Parse the string userId to an int to prevent compiler error CS0019
     if (!string.IsNullOrEmpty(userId) && int.TryParse(userId, out int parsedUserId))
     {
+        // Retrieve notifications synchronously or asynchronously in Razor
+        var notifList = _notificationService.GetForUserAsync(parsedUserId).GetAwaiter().GetResult();
+        notifications = notifList.OrderByDescending(n => n.CreatedDate).Take(5).ToList();
+        unreadCount = notifList.Count(n => !n.IsRead);
+
         var dbUser = _context.Users.FirstOrDefault(u => u.UserId == parsedUserId);
         
         if (dbUser != null && !string.IsNullOrWhiteSpace(dbUser.FullName))
@@ -50,7 +58,10 @@
         <div class="dropdown">
             <button class="btn btn-link position-relative text-muted p-2 border-0 shadow-none" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fa-regular fa-bell fs-5"></i>
-                <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.6rem;">2</span>
+                @if (unreadCount > 0)
+                {
+                    <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.6rem;">@unreadCount</span>
+                }
             </button>
             <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-0" aria-labelledby="notifDropdown" style="width: 320px; font-size: 0.85rem;">
                 <div class="p-3 border-bottom d-flex align-items-center justify-content-between bg-light">
@@ -58,73 +69,32 @@
                     <a href="/Notification" class="text-primary text-decoration-none small">View All</a>
                 </div>
                 <div class="list-group list-group-flush" style="max-height: 240px; overflow-y: auto;">
-                    @if (activeRole == "customer")
+                    @if (notifications.Any())
                     {
-                        <a href="/Dashboard" class="list-group-item list-group-item-action p-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="fw-semibold text-dark">Application Submitted</span>
-                                <span class="text-muted small text-nowrap">10m ago</span>
-                            </div>
-                            <p class="mb-0 text-muted small">Your Home Purchase Loan application has been submitted.</p>
-                        </a>
-                        <a href="/Dashboard" class="list-group-item list-group-item-action p-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="fw-semibold text-dark">Documents Verified</span>
-                                <span class="text-muted small text-nowrap">5m ago</span>
-                            </div>
-                            <p class="mb-0 text-muted small">Your uploaded PAN and Income papers are verified.</p>
-                        </a>
-                    }
-                    else if (activeRole == "underwriter")
-                    {
-                        <a href="/Approval/Review/9844" class="list-group-item list-group-item-action p-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="fw-semibold text-dark">Ready for Underwriting</span>
-                                <span class="text-muted small text-nowrap">15m ago</span>
-                            </div>
-                            <p class="mb-0 text-muted small">Application #LOC-9844-32 has passed Credit Score thresholds.</p>
-                        </a>
-                        <a href="/Disbursement/Create/9844" class="list-group-item list-group-item-action p-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="fw-semibold text-dark">Disbursement Pending</span>
-                                <span class="text-muted small text-nowrap">1h ago</span>
-                            </div>
-                            <p class="mb-0 text-muted small">Approved application #LOC-7788-12 needs payment processing.</p>
-                        </a>
-                    }
-                    else if (activeRole == "admin")
-                    {
-                        <a href="/UserManagement" class="list-group-item list-group-item-action p-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="fw-semibold text-dark">New User Registered</span>
-                                <span class="text-muted small text-nowrap">30m ago</span>
-                            </div>
-                            <p class="mb-0 text-muted small">New loan officer account registered.</p>
-                        </a>
-                        <a href="/Settings/ScoringRules" class="list-group-item list-group-item-action p-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="fw-semibold text-dark">System Weights Updated</span>
-                                <span class="text-muted small text-nowrap">2h ago</span>
-                            </div>
-                            <p class="mb-0 text-muted small">Scoring engine weights were successfully modified.</p>
-                        </a>
+                        foreach (var notif in notifications)
+                        {
+                            var timeAgo = "";
+                            var diff = DateTime.UtcNow - notif.CreatedDate;
+                            if (diff.TotalMinutes < 1) timeAgo = "Just now";
+                            else if (diff.TotalMinutes < 60) timeAgo = $"{(int)diff.TotalMinutes}m ago";
+                            else if (diff.TotalHours < 24) timeAgo = $"{(int)diff.TotalHours}h ago";
+                            else timeAgo = $"{(int)diff.TotalDays}d ago";
+                            
+                            <a href="/Notification" class="list-group-item list-group-item-action p-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="fw-semibold text-dark text-truncate" style="max-width: 180px;">@notif.Title</span>
+                                    <span class="text-muted small text-nowrap">@timeAgo</span>
+                                </div>
+                                <p class="mb-0 text-muted small text-truncate" style="max-width: 280px;" title="@notif.Message">@notif.Message</p>
+                            </a>
+                        }
                     }
                     else
                     {
-                        <a href="/Kyc/Verify/9844" class="list-group-item list-group-item-action p-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="fw-semibold text-dark">KYC Uploaded</span>
-                                <span class="text-muted small text-nowrap">2m ago</span>
-                            </div>
-                            <p class="mb-0 text-muted small">Customer 'Rajesh Kumar' uploaded verification docs.</p>
-                        </a>
-                        <a href="/Document/Validate/9844" class="list-group-item list-group-item-action p-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="fw-semibold text-dark">Documents Uploaded</span>
-                                <span class="text-muted small text-nowrap">15m ago</span>
-                            </div>
-                            <p class="mb-0 text-muted small">Application #LOC-9844-32 has documents ready for validation.</p>
-                        </a>
+                        <div class="text-center py-4 text-muted small">
+                            <i class="fa-regular fa-bell-slash mb-2 d-block fs-5"></i>
+                            No notifications
+                        </div>
                     }
                 </div>
                 <div class="p-2 border-top text-center bg-light">
