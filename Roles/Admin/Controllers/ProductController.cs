@@ -36,14 +36,7 @@ namespace LOCPS.Controllers
         /// </summary>
         private HttpClient GetApiClient()
         {
-            var client = _httpClientFactory.CreateClient("LoanProductApi");
-            var request = _httpContextAccessor.HttpContext?.Request;
-            if (request != null)
-            {
-                var baseUrl = $"{request.Scheme}://{request.Host}";
-                client.BaseAddress = new Uri(baseUrl);
-            }
-            return client;
+            return _httpClientFactory.CreateClient("LoanProductApi");
         }
 
         // GET: /Product
@@ -95,34 +88,41 @@ namespace LOCPS.Controllers
                 var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
                 var createdByUserId = int.TryParse(userId, out var id) ? id : 1;
 
-                var client = GetApiClient();
-                if (client.BaseAddress != null)
+                try
                 {
-                    var createReq = new CreateProductRequest
+                    var client = GetApiClient();
+                    if (client.BaseAddress != null)
                     {
-                        ProductName = product.ProductName,
-                        ProductDescription = product.ProductDescription,
-                        MinAmount = product.MinAmount,
-                        MaxAmount = product.MaxAmount,
-                        InterestRate = product.InterestRate,
-                        MaxTenureMonths = product.MaxTenureMonths,
-                        ProcessingFee = product.ProcessingFee,
-                        CreatedByUserId = createdByUserId
-                    };
+                        var createReq = new CreateProductRequest
+                        {
+                            ProductName = product.ProductName,
+                            ProductDescription = product.ProductDescription,
+                            MinAmount = product.MinAmount,
+                            MaxAmount = product.MaxAmount,
+                            InterestRate = product.InterestRate,
+                            MaxTenureMonths = product.MaxTenureMonths,
+                            ProcessingFee = product.ProcessingFee,
+                            CreatedByUserId = createdByUserId
+                        };
 
-                    var jsonContent = new StringContent(JsonSerializer.Serialize(createReq), Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync("/api/loanproducts", jsonContent);
+                        var jsonContent = new StringContent(JsonSerializer.Serialize(createReq), Encoding.UTF8, "application/json");
+                        var response = await client.PostAsync("/api/loanproducts", jsonContent);
 
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction(nameof(Index));
+                        if (response.IsSuccessStatusCode)
+                        {
+                            return RedirectToAction(nameof(Index));
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "HTTP call to POST /api/loanproducts failed. Falling back to service.");
                 }
 
                 await _loanProductService.CreateAsync(product, createdByUserId);
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, "Failed to create loan product.");
                 return View(product);
@@ -183,16 +183,23 @@ namespace LOCPS.Controllers
 
             try
             {
-                var client = GetApiClient();
-                if (client.BaseAddress != null)
+                try
                 {
-                    var jsonContent = new StringContent(JsonSerializer.Serialize(product), Encoding.UTF8, "application/json");
-                    var response = await client.PutAsync($"/api/loanproducts/{product.ProductId}", jsonContent);
-
-                    if (response.IsSuccessStatusCode)
+                    var client = GetApiClient();
+                    if (client.BaseAddress != null)
                     {
-                        return RedirectToAction(nameof(Index));
+                        var jsonContent = new StringContent(JsonSerializer.Serialize(product), Encoding.UTF8, "application/json");
+                        var response = await client.PutAsync($"/api/loanproducts/{product.ProductId}", jsonContent);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            return RedirectToAction(nameof(Index));
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "HTTP call to PUT /api/loanproducts failed. Falling back to service.");
                 }
 
                 await _loanProductService.UpdateAsync(product);

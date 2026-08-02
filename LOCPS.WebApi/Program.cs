@@ -1,48 +1,34 @@
-using LOCPS.Constants;
 using LOCPS.Data;
-using LOCPS.Models;
 using LOCPS.Repositories.Implementation;
 using LOCPS.Repositories.Interfaces;
 using LOCPS.Services.Implementations;
 using LOCPS.Services.Interfaces;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add Authentication
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.Cookie.Name = AuthConstants.AuthCookieName;
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-        options.ExpireTimeSpan = TimeSpan.FromHours(AuthConstants.SessionHours);
-        options.SlidingExpiration = true;
-        options.LoginPath = "/Account/Login";
-        options.AccessDeniedPath = "/Account/AccessDenied";
-        options.LogoutPath = "/Account/Logout";
-    });
+// Add services to the container.
+builder.Services.AddControllers();
 
-// Add HTTP Client and HttpContextAccessor for API consumption
-builder.Services.AddHttpClient("LoanProductApi", client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["WebApiBaseUrl"] ?? "https://localhost:7083");
-});
-builder.Services.AddHttpContextAccessor();
-
-// Add MVC services (no API controllers)
-builder.Services.AddControllersWithViews(options =>
-{
-    options.Filters.Add<LOCPS.LocpsRoleAuthorizeFilter>();
-})
-.AddRazorOptions(options =>
-{
-    options.ViewLocationExpanders.Add(new LOCPS.RoleBasedViewLocationExpander());
-});
-
-builder.Services.AddDbContext<LOCPS.Data.AppDbContext>(options =>
+// Configure DbContext
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MyConn")));
+
+// Configure CORS
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowMvcApp",
+        policy =>
+        {
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
 
 // ── Repository Layer ──────────────────────────────────────────────────────────
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -58,9 +44,6 @@ builder.Services.AddScoped<IEmiRepository, EmiRepository>();
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 
 // ── Service Layer ─────────────────────────────────────────────────────────────
-// NOTE: AuditLogService and NotificationService are registered first because
-//       other services depend on them (constructor injection order matters in
-//       case of circular dependency resolution — Scoped lifetime avoids issues).
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -76,40 +59,18 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 var app = builder.Build();
 
-// Seed the database on startup
-using (var scope = app.Services.CreateScope())
-{
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    try
-    {
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await DbInitializer.InitializeAsync(context, logger);
-    }
-    catch (Exception ex)
-    {
-        logger.LogWarning(ex, "Could not connect to database or seed data. Please ensure SQL Server is running and connection string in appsettings.json is valid.");
-    }
-}
-
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 
-app.UseRouting();
+app.UseCors("AllowMvcApp");
 
-app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

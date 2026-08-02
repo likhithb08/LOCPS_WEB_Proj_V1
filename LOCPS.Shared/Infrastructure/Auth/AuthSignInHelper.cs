@@ -4,6 +4,7 @@ using LOCPS.Enums;
 using LOCPS.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 
 namespace LOCPS.Infrastructure.Auth;
 

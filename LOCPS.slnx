@@ -1,3 +1,5 @@
 <Solution>
   <Project Path="LOCPS.csproj" />
+  <Project Path="LOCPS.Shared/LOCPS.Shared.csproj" />
+  <Project Path="LOCPS.WebApi/LOCPS.WebApi.csproj" />
 </Solution>
