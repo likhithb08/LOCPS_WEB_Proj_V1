@@ -55,7 +55,7 @@ namespace LOCPS.Controllers
                         var apiResult = JsonSerializer.Deserialize<ApiResult<IEnumerable<LoanProduct>>>(content, _jsonOptions);
                         if (apiResult != null && apiResult.Success && apiResult.Data != null)
                         {
-                            ViewBag.Source = "Consumed via Web API (/api/loanproducts)";
+                            // ViewBag.Source = "Consumed via Web API (/api/loanproducts)";
                             return View(apiResult.Data);
                         }
                     }

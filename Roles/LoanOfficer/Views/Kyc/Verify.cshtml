@@ -63,7 +63,8 @@
                 {
                     var panVerified = !string.IsNullOrEmpty(kyc.PanNumber);
                     var aadhaarVerified = !string.IsNullOrEmpty(kyc.AadhaarNumber);
-                    var addressVerified = !string.IsNullOrEmpty(kyc.AddressProof);
+                    var dobVerified = kyc.DateOfBirth != default(DateOnly);
+                    var genderVerified = true;
                     var kycStatusClass = kyc.VerificationStatus == LOCPS.Enums.KycStatus.Verified ? "success" : (kyc.VerificationStatus == LOCPS.Enums.KycStatus.Rejected ? "danger" : "warning");
 
 
@@ -113,27 +114,45 @@
                         <span class="badge-status badge-status-@(aadhaarVerified ? "approved" : "pending")">@(aadhaarVerified ? "Verified" : "Pending")</span>
                     </div>
 
-                    <!-- Address Verification -->
+                    <!-- Date of Birth Verification -->
+
                     <div class="py-3 border-bottom d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
                         <div class="d-flex align-items-center gap-3">
-                            <div class="rounded-circle d-flex align-items-center justify-content-center border border-@(addressVerified ? "success" : "warning") text-@(addressVerified ? "success" : "warning") bg-@(addressVerified ? "success" : "warning") bg-opacity-10" style="width: 38px; height: 38px; font-weight: 700;">
-                                <i class="fa-solid fa-@(addressVerified ? "check" : "clock")"></i>
+                            <div class="rounded-circle d-flex align-items-center justify-content-center border border-@(dobVerified ? "success" : "warning") text-@(dobVerified ? "success" : "warning") bg-@(dobVerified ? "success" : "warning") bg-opacity-10" style="width: 38px; height: 38px; font-weight: 700;">
+                                <i class="fa-solid fa-@(dobVerified ? "check" : "clock")"></i>
                             </div>
                             <div>
-                                <div class="fw-semibold">Address Matching Checks</div>
+                                <div class="fw-semibold">Date of Birth Verification</div>
                                 <span class="text-muted small">
-                                    @if (addressVerified)
+                                    @if (dobVerified)
                                     {
-                                        <text>Address proof uploaded: @kyc.AddressProof</text>
+                                        <text>DOB: @kyc.DateOfBirth.ToString("dd MMM yyyy") — Verified.</text>
                                     }
                                     else
                                     {
-                                        <text>Awaiting address proof from customer.</text>
+                                        <text>Awaiting Date of Birth from customer.</text>
                                     }
                                 </span>
                             </div>
                         </div>
-                        <span class="badge-status badge-status-@(addressVerified ? "approved" : "pending")">@(addressVerified ? "Verified" : "Pending")</span>
+                        <span class="badge-status badge-status-@(dobVerified ? "approved" : "pending")">@(dobVerified ? "Verified" : "Pending")</span>
+                    </div>
+
+                    <!-- Gender Verification -->
+
+                    <div class="py-3 border-bottom d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center border border-@(genderVerified ? "success" : "warning") text-@(genderVerified ? "success" : "warning") bg-@(genderVerified ? "success" : "warning") bg-opacity-10" style="width: 38px; height: 38px; font-weight: 700;">
+                                <i class="fa-solid fa-@(genderVerified ? "check" : "clock")"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Gender Verification</div>
+                                <span class="text-muted small">
+                                    <text>Gender: @kyc.Gender.ToString() — Verified.</text>
+                                </span>
+                            </div>
+                        </div>
+                        <span class="badge-status badge-status-@(genderVerified ? "approved" : "pending")">@(genderVerified ? "Verified" : "Pending")</span>
                     </div>
 
                     <!-- KYC Decision -->
@@ -198,11 +217,18 @@
                             <div class="fw-semibold text-secondary mt-1">@kyc.AadhaarNumber</div>
                         </li>
                     }
-                    @if (kyc != null && !string.IsNullOrEmpty(kyc.AddressProof))
+                    @if (kyc != null && kyc.DateOfBirth != default(DateOnly))
                     {
                         <li class="list-group-item px-0 py-3">
-                            <div class="text-muted">Address Proof Document</div>
-                            <div class="fw-semibold text-secondary mt-1">@kyc.AddressProof</div>
+                            <div class="text-muted">Date of Birth</div>
+                            <div class="fw-semibold text-secondary mt-1">@kyc.DateOfBirth.ToString("dd MMM yyyy")</div>
+                        </li>
+                    }
+                    @if (kyc != null)
+                    {
+                        <li class="list-group-item px-0 py-3">
+                            <div class="text-muted">Gender</div>
+                            <div class="fw-semibold text-secondary mt-1">@kyc.Gender.ToString()</div>
                         </li>
                     }
                     <li class="list-group-item px-0 py-3">

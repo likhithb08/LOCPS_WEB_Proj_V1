@@ -52,11 +52,12 @@ public class KycService : IKycService
             ?? throw new ServiceException("Failed to verify KYC.");
 
         await _auditLogService.LogAsync(verifiedByUserId, Actions.Updated, $"KYC:{kycId}", "Pending", "Verified", null, null);
-        await _notificationService.CreateAsync(kyc.ApplicationId, NotificationType.KYCVerified, "KYC Verified", "Your KYC has been verified successfully.", kyc.ApplicationId);
 
         var app = await _applicationRepository.GetWithDetailsAsync(kyc.ApplicationId);
         if (app != null)
         {
+            await _notificationService.CreateAsync(app.CustomerId, NotificationType.KYCVerified, "KYC Verified", "Your KYC has been verified successfully.", kyc.ApplicationId);
+            
             app.Status = ApplicationStatus.KYCVerified;
             await _applicationRepository.UpdateLoanApplicationAsync(app);
         }
@@ -77,7 +78,12 @@ public class KycService : IKycService
             ?? throw new ServiceException("Failed to reject KYC.");
 
         await _auditLogService.LogAsync(verifiedByUserId, Actions.Updated, $"KYC:{kycId}", "Pending", "Rejected", null, null);
-        await _notificationService.CreateAsync(kyc.ApplicationId, NotificationType.ApplicationStatusUpdate, "KYC Rejected", $"Your KYC has been rejected. Remarks: {remarks}", kyc.ApplicationId);
+        
+        var app = await _applicationRepository.GetWithDetailsAsync(kyc.ApplicationId);
+        if (app != null)
+        {
+            await _notificationService.CreateAsync(app.CustomerId, NotificationType.ApplicationStatusUpdate, "KYC Rejected", $"Your KYC has been rejected. Remarks: {remarks}", kyc.ApplicationId);
+        }
 
         return updated;
     }
