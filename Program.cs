@@ -42,7 +42,7 @@ builder.Services.AddControllersWithViews(options =>
 });
 
 builder.Services.AddDbContext<LOCPS.Data.AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MyConn")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("MyConn"), b => b.MigrationsAssembly("LOCPS")));
 
 // ── Repository Layer ──────────────────────────────────────────────────────────
 builder.Services.AddScoped<IUserRepository, UserRepository>();

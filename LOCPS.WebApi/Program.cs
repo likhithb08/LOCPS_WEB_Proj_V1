@@ -12,7 +12,7 @@ builder.Services.AddControllers();
 
 // Configure DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MyConn")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("MyConn"), b => b.MigrationsAssembly("LOCPS")));
 
 // Configure CORS
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();

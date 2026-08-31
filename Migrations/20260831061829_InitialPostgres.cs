@@ -1,12 +1,13 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace LOCPS.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialPostgres : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,12 +16,11 @@ namespace LOCPS.Migrations
                 name: "Role",
                 columns: table => new
                 {
-                    RoleId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Roles = table.Column<int>(type: "int", nullable: false),
-                    RoleDescription = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    RoleId = table.Column<int>(type: "integer", nullable: false),
+                    Roles = table.Column<int>(type: "integer", nullable: false),
+                    RoleDescription = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -31,11 +31,11 @@ namespace LOCPS.Migrations
                 name: "Permissions",
                 columns: table => new
                 {
-                    PermissionId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PermissionName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
-                    RoleId = table.Column<int>(type: "int", nullable: false)
+                    PermissionId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PermissionName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: true),
+                    RoleId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -52,17 +52,17 @@ namespace LOCPS.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
-                    RoleId = table.Column<int>(type: "int", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastLoginDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    UserId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    FullName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    PasswordHash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    PhoneNumber = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: false),
+                    RoleId = table.Column<int>(type: "integer", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastLoginDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -79,16 +79,16 @@ namespace LOCPS.Migrations
                 name: "Auditlogs",
                 columns: table => new
                 {
-                    AuditId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    Actions = table.Column<int>(type: "int", nullable: false),
-                    EntityId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    OldValue = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    NewValue = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IpAddress = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    UserAgent = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    AuditId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    Actions = table.Column<int>(type: "integer", nullable: false),
+                    EntityId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    OldValue = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    NewValue = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IpAddress = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    UserAgent = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -105,18 +105,18 @@ namespace LOCPS.Migrations
                 name: "LoanProducts",
                 columns: table => new
                 {
-                    ProductId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    ProductDescription = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    MinAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    MaxAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    InterestRate = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    MaxTenureMonths = table.Column<int>(type: "int", nullable: false),
-                    ProcessingFee = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedByUserId = table.Column<int>(type: "int", nullable: false)
+                    ProductId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ProductName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    ProductDescription = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    MinAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    MaxAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    InterestRate = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    MaxTenureMonths = table.Column<int>(type: "integer", nullable: false),
+                    ProcessingFee = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedByUserId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -130,22 +130,47 @@ namespace LOCPS.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ScoringConfigs",
+                columns: table => new
+                {
+                    ConfigId = table.Column<int>(type: "integer", nullable: false),
+                    MinCreditScore = table.Column<int>(type: "integer", nullable: false),
+                    BureauScoreWeight = table.Column<int>(type: "integer", nullable: false),
+                    DebtToIncomeWeight = table.Column<int>(type: "integer", nullable: false),
+                    CreditHistoryAgeWeight = table.Column<int>(type: "integer", nullable: false),
+                    RepaymentConsistencyWeight = table.Column<int>(type: "integer", nullable: false),
+                    CreditUtilizationWeight = table.Column<int>(type: "integer", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedByUserId = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ScoringConfigs", x => x.ConfigId);
+                    table.ForeignKey(
+                        name: "FK_ScoringConfigs_Users_UpdatedByUserId",
+                        column: x => x.UpdatedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "LoanApplications",
                 columns: table => new
                 {
-                    ApplicationId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ApplicationNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    CustomerId = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
-                    RequestedAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    ApprovedAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
-                    AnnualIncome = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    EmploymentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastUpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CreatedByUserId = table.Column<int>(type: "int", nullable: false)
+                    ApplicationId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ApplicationNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    CustomerId = table.Column<int>(type: "integer", nullable: false),
+                    ProductId = table.Column<int>(type: "integer", nullable: false),
+                    RequestedAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    ApprovedAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
+                    AnnualIncome = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    EmploymentType = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastUpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedByUserId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -174,17 +199,17 @@ namespace LOCPS.Migrations
                 name: "Approval",
                 columns: table => new
                 {
-                    ApprovalId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ApplicationId = table.Column<int>(type: "int", nullable: false),
-                    ApprovedAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
-                    ApprovedTenureMonths = table.Column<int>(type: "int", nullable: false),
-                    ApprovedInterestRate = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
-                    ApprovalStatus = table.Column<int>(type: "int", nullable: true),
-                    ApprovedByUserId = table.Column<int>(type: "int", nullable: false),
-                    ApprovalDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    RejectionReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Comments = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ApprovalId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ApplicationId = table.Column<int>(type: "integer", nullable: false),
+                    ApprovedAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
+                    ApprovedTenureMonths = table.Column<int>(type: "integer", nullable: false),
+                    ApprovedInterestRate = table.Column<decimal>(type: "numeric(5,2)", precision: 5, scale: 2, nullable: false),
+                    ApprovalStatus = table.Column<int>(type: "integer", nullable: true),
+                    ApprovedByUserId = table.Column<int>(type: "integer", nullable: false),
+                    ApprovalDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    RejectionReason = table.Column<string>(type: "text", nullable: true),
+                    Comments = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -207,17 +232,17 @@ namespace LOCPS.Migrations
                 name: "CreditEvaluation",
                 columns: table => new
                 {
-                    CreditId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ApplicationId = table.Column<int>(type: "int", nullable: false),
-                    CreditScore = table.Column<int>(type: "int", nullable: false),
-                    DebitToIncomeRatio = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
-                    PaymentHistoryScore = table.Column<int>(type: "int", nullable: false),
-                    ExistingLiabilities = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    CreditRecommendation = table.Column<int>(type: "int", nullable: true),
-                    EvaluatedByUserId = table.Column<int>(type: "int", nullable: true),
-                    EvaluatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Comments = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true)
+                    CreditId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ApplicationId = table.Column<int>(type: "integer", nullable: false),
+                    CreditScore = table.Column<int>(type: "integer", nullable: false),
+                    DebitToIncomeRatio = table.Column<decimal>(type: "numeric(5,2)", precision: 5, scale: 2, nullable: false),
+                    PaymentHistoryScore = table.Column<int>(type: "integer", nullable: false),
+                    ExistingLiabilities = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    CreditRecommendation = table.Column<int>(type: "integer", nullable: true),
+                    EvaluatedByUserId = table.Column<int>(type: "integer", nullable: true),
+                    EvaluatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Comments = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -240,18 +265,18 @@ namespace LOCPS.Migrations
                 name: "Disbursments",
                 columns: table => new
                 {
-                    DisbursmentId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ApplicationId = table.Column<int>(type: "int", nullable: false),
-                    AmountApproved = table.Column<decimal>(type: "decimal(13,2)", precision: 13, scale: 2, nullable: false),
-                    DisbursmentDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DisbursmentMode = table.Column<int>(type: "int", nullable: false),
+                    DisbursmentId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ApplicationId = table.Column<int>(type: "integer", nullable: false),
+                    AmountApproved = table.Column<decimal>(type: "numeric(13,2)", precision: 13, scale: 2, nullable: false),
+                    DisbursmentDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DisbursmentMode = table.Column<int>(type: "integer", nullable: false),
                     BankAccountNumber = table.Column<long>(type: "bigint", nullable: false),
-                    BankName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TransactionId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    ProcessedByUserID = table.Column<int>(type: "int", nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    BankName = table.Column<string>(type: "text", nullable: false),
+                    TransactionId = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    ProcessedByUserID = table.Column<int>(type: "integer", nullable: false),
+                    Notes = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -274,16 +299,16 @@ namespace LOCPS.Migrations
                 name: "Emis",
                 columns: table => new
                 {
-                    EmiId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ApplicationID = table.Column<int>(type: "int", nullable: false),
-                    EmiNumber = table.Column<int>(type: "int", nullable: false),
-                    EmiAmount = table.Column<decimal>(type: "decimal(13,2)", precision: 13, scale: 2, nullable: false),
-                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PaidDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    PaidAmount = table.Column<decimal>(type: "decimal(13,2)", precision: 13, scale: 2, nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    PenaltyAmount = table.Column<decimal>(type: "decimal(13,2)", precision: 13, scale: 2, nullable: false)
+                    EmiId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ApplicationID = table.Column<int>(type: "integer", nullable: false),
+                    EmiNumber = table.Column<int>(type: "integer", nullable: false),
+                    EmiAmount = table.Column<decimal>(type: "numeric(13,2)", precision: 13, scale: 2, nullable: false),
+                    DueDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PaidDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    PaidAmount = table.Column<decimal>(type: "numeric(13,2)", precision: 13, scale: 2, nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    PenaltyAmount = table.Column<decimal>(type: "numeric(13,2)", precision: 13, scale: 2, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -300,21 +325,22 @@ namespace LOCPS.Migrations
                 name: "Kyc",
                 columns: table => new
                 {
-                    KycId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ApplicationId = table.Column<int>(type: "int", nullable: false),
-                    AadhaarNumber = table.Column<string>(type: "nvarchar(12)", maxLength: 12, nullable: false),
-                    PanNumber = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    KycId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ApplicationId = table.Column<int>(type: "integer", nullable: false),
+                    AadhaarNumber = table.Column<string>(type: "character varying(12)", maxLength: 12, nullable: false),
+                    PanNumber = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
                     DateOfBirth = table.Column<DateOnly>(type: "date", nullable: false),
-                    Gender = table.Column<int>(type: "int", nullable: false),
-                    AddressProof = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
-                    IdentityProof = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    IncomeProof = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    VerificationStatus = table.Column<int>(type: "int", nullable: false),
-                    VerifiedByUserId = table.Column<int>(type: "int", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    VerifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Gender = table.Column<int>(type: "integer", nullable: false),
+                    AddressProof = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: true),
+                    IdentityProof = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    IncomeProof = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    VerificationStatus = table.Column<int>(type: "integer", nullable: false),
+                    Remarks = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    VerifiedByUserId = table.Column<int>(type: "integer", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    VerifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -337,16 +363,16 @@ namespace LOCPS.Migrations
                 name: "Notifications",
                 columns: table => new
                 {
-                    NotificationId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    NotificationType = table.Column<int>(type: "int", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
-                    RelatedApplicationId = table.Column<int>(type: "int", nullable: false),
-                    IsRead = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ReadDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    NotificationId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    NotificationType = table.Column<int>(type: "integer", nullable: false),
+                    Title = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Message = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
+                    RelatedApplicationId = table.Column<int>(type: "integer", nullable: false),
+                    IsRead = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ReadDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -369,18 +395,19 @@ namespace LOCPS.Migrations
                 name: "Document",
                 columns: table => new
                 {
-                    DocumentId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ApplicationId = table.Column<int>(type: "int", nullable: false),
-                    KycId = table.Column<int>(type: "int", nullable: true),
-                    DocumentType = table.Column<int>(type: "int", nullable: false),
-                    FileName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DocumentId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ApplicationId = table.Column<int>(type: "integer", nullable: false),
+                    KycId = table.Column<int>(type: "integer", nullable: true),
+                    DocumentType = table.Column<int>(type: "integer", nullable: false),
+                    FileName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    FilePath = table.Column<string>(type: "text", nullable: false),
                     FileSize = table.Column<long>(type: "bigint", nullable: false),
-                    UploadDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UploadedByUserId = table.Column<int>(type: "int", nullable: false),
-                    DocumentStatus = table.Column<int>(type: "int", nullable: false),
-                    VerifiedByUserId = table.Column<int>(type: "int", nullable: false)
+                    UploadDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UploadedByUserId = table.Column<int>(type: "integer", nullable: false),
+                    DocumentStatus = table.Column<int>(type: "integer", nullable: false),
+                    Remarks = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    VerifiedByUserId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -523,6 +550,11 @@ namespace LOCPS.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ScoringConfigs_UpdatedByUserId",
+                table: "ScoringConfigs",
+                column: "UpdatedByUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_RoleId",
                 table: "Users",
                 column: "RoleId");
@@ -554,6 +586,9 @@ namespace LOCPS.Migrations
 
             migrationBuilder.DropTable(
                 name: "Permissions");
+
+            migrationBuilder.DropTable(
+                name: "ScoringConfigs");
 
             migrationBuilder.DropTable(
                 name: "Kyc");

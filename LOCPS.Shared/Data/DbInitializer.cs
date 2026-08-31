@@ -17,7 +17,10 @@ public static class DbInitializer
         if (!await context.Role.AnyAsync())
         {
             using var transaction = await context.Database.BeginTransactionAsync();
-            await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [Role] ON");
+            var isSqlServer = context.Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer";
+            if (isSqlServer)
+                await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [Role] ON");
+
             context.Role.AddRange(
                 new Role { RoleId = RoleConstants.CustomerRoleId, Roles = Roles.Customer, RoleDescription = "Customer role for loan applicants", IsActive = true },
                 new Role { RoleId = RoleConstants.AdminRoleId, Roles = Roles.Admin, RoleDescription = "Admin role for system administration", IsActive = true },
@@ -25,7 +28,9 @@ public static class DbInitializer
                 new Role { RoleId = RoleConstants.UnderWriterRoleId, Roles = Roles.UnderWriter, RoleDescription = "UnderWriter role for loan underwriting", IsActive = true }
             );
             await context.SaveChangesAsync();
-            await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [Role] OFF");
+
+            if (isSqlServer)
+                await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [Role] OFF");
             await transaction.CommitAsync();
             logger.LogInformation("Seeded default roles.");
         }
