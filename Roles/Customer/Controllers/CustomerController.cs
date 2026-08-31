@@ -285,7 +285,7 @@ namespace LOCPS.Controllers
             }
 
             // Redirect back to Settings page
-            return RedirectToAction("Index", "Settings");
+            return RedirectToAction("Login", "Account");
         }
     }
 }
