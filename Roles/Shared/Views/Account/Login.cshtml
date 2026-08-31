@@ -40,6 +40,13 @@
             </div>
 
             <div class="px-4 pt-3">
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i> @ViewBag.Error
+                    </div>
+                }
+                
                 <ul class="nav nav-pills nav-pills-custom g-2 d-flex justify-content-center border-bottom pb-3" id="loginTab" role="tablist">
                     <li class="nav-item flex-fill" role="presentation">
                         <button class="nav-link w-100 active" id="customer-tab-btn" data-bs-toggle="pill" data-bs-target="#customer-pane" type="button" role="tab" aria-selected="true">
